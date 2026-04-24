@@ -21,6 +21,7 @@ import {
   Newspaper,
   Video,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -706,10 +707,39 @@ export default function FakeNewsDetectorFrontend() {
   const [language, setLanguage] = useState("English");
   const [resultMode, setResultMode] = useState("verified");
 
-  const goVerify = () => {
-    const suspicious = url.toLowerCase().includes("unknown") || url.toLowerCase().includes("viral") || url.toLowerCase().includes("fake");
-    setResultMode(suspicious ? "unverified" : "verified");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [analysisData, setAnalysisData] = useState(null);
+
+  const goVerify = async () => {
+    if (!url) return;
+    
+    setLoading(true);
+    setError(null);
     setPage("Results");
+
+    try {
+      const response = await fetch("http://localhost:8000/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to analyze content. Please make sure the backend is running.");
+      }
+
+      const data = await response.json();
+      setAnalysisData(data);
+      setResultMode(data.verdict.toLowerCase().includes("true") ? "verified" : "unverified");
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -793,24 +823,143 @@ export default function FakeNewsDetectorFrontend() {
                 <h1 className="text-3xl font-bold tracking-tight">Verification Results</h1>
                 <p className="mt-1 text-slate-500">Confidence-based output with source comparison and transparent warnings</p>
               </div>
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => setResultMode("verified")}
-                  className="rounded-2xl border-slate-200"
-                >
-                  Show Verified
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setResultMode("unverified")}
-                  className="rounded-2xl border-slate-200"
-                >
-                  Show Unverified
-                </Button>
-              </div>
             </div>
-            {resultMode === "verified" ? <VerifiedResult query={url} /> : <UnverifiedResult query={url} />}
+
+            {loading ? (
+              <div className="flex min-h-[400px] flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-12 text-center">
+                <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+                <h2 className="mt-4 text-xl font-semibold">Analyzing Content...</h2>
+                <p className="mt-2 text-slate-500">Comparing with credible sources and fact-check databases.</p>
+              </div>
+            ) : error ? (
+              <Card className="rounded-3xl border-red-200 bg-red-50 p-12 text-center">
+                <AlertTriangle className="mx-auto h-12 w-12 text-red-600" />
+                <h2 className="mt-4 text-xl font-semibold text-red-900">Analysis Failed</h2>
+                <p className="mt-2 text-red-700">{error}</p>
+                <Button onClick={() => setPage("Home")} className="mt-6 rounded-2xl bg-red-600 text-white hover:bg-red-700">
+                  Try Again
+                </Button>
+              </Card>
+            ) : analysisData ? (
+              <div className="space-y-6">
+                <Card className={`overflow-hidden rounded-3xl border-${resultMode === "verified" ? "emerald" : "red"}-200 shadow-sm`}>
+                  <div className={`bg-${resultMode === "verified" ? "emerald" : "red"}-600 p-6 text-white`}>
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                      <div>
+                        <div className={`flex items-center gap-2 text-${resultMode === "verified" ? "emerald" : "red"}-50`}>
+                          {resultMode === "verified" ? <CheckCircle2 className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
+                          <span className="text-sm font-medium uppercase tracking-wide">Verdict: {analysisData.verdict}</span>
+                        </div>
+                        <h2 className="mt-2 text-3xl font-bold">{resultMode === "verified" ? "Verified Information" : "Potential Misinformation"}</h2>
+                        <p className={`mt-2 max-w-2xl text-${resultMode === "verified" ? "emerald" : "red"}-50`}>
+                          {analysisData.summary}
+                        </p>
+                      </div>
+                      <div className="rounded-3xl bg-white/10 p-5 backdrop-blur">
+                        <p className={`text-sm text-${resultMode === "verified" ? "emerald" : "red"}-50`}>Confidence Score</p>
+                        <p className="mt-2 text-4xl font-extrabold">{analysisData.confidence_score}%</p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+                  <Card className="rounded-3xl border-slate-200 shadow-sm">
+                    <CardHeader>
+                      <CardTitle>Analysis Reasoning</CardTitle>
+                      <CardDescription>Deep dive into why this verdict was reached</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
+                        <p className="leading-7 text-slate-700 whitespace-pre-wrap">{analysisData.reasoning}</p>
+                      </div>
+                      
+                      {analysisData.red_flags.length > 0 && (
+                        <div className="mt-4">
+                          <h4 className="mb-3 font-semibold text-slate-900">Red Flags Detected</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {analysisData.red_flags.map((flag, i) => (
+                              <Badge key={i} variant="outline" className="rounded-full border-red-200 bg-red-50 text-red-700 py-1 px-3">
+                                {flag}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <Card className="rounded-3xl border-slate-200 shadow-sm">
+                    <CardHeader>
+                      <CardTitle>Source Credibility</CardTitle>
+                      <CardDescription>Domain reputation assessment</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {analysisData.source_credibility ? (
+                        <div className={`rounded-2xl border border-${analysisData.source_credibility.rating === "high" ? "emerald" : "amber"}-200 bg-${analysisData.source_credibility.rating === "high" ? "emerald" : "amber"}-50 p-6`}>
+                          <div className="flex items-center justify-between mb-4">
+                             <h4 className="text-lg font-bold text-slate-900">{analysisData.source_credibility.domain}</h4>
+                             <Badge className={`rounded-full ${analysisData.source_credibility.rating === "high" ? "bg-emerald-600" : "bg-amber-600"} text-white`}>
+                                {analysisData.source_credibility.rating.toUpperCase()} Reliability
+                             </Badge>
+                          </div>
+                          <div className="grid gap-4">
+                            <div>
+                                <p className="text-xs font-semibold uppercase text-slate-400 tracking-wider">Bias Rating</p>
+                                <p className="text-sm font-medium text-slate-700 mt-1">{analysisData.source_credibility.bias}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold uppercase text-slate-400 tracking-wider">Description</p>
+                                <p className="text-sm text-slate-600 mt-1 leading-relaxed">{analysisData.source_credibility.description}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 italic text-slate-500">
+                          No specific domain data available.
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {analysisData.fact_checks.length > 0 && (
+                  <Card className="rounded-3xl border-slate-200 shadow-sm">
+                    <CardHeader>
+                      <CardTitle>Supporting Evidence & Fact Checks</CardTitle>
+                      <CardDescription>Direct findings from independent fact-checking organizations</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {analysisData.fact_checks.map((check, i) => (
+                          <div key={i} className="rounded-2xl border border-slate-200 p-5 flex flex-col justify-between">
+                            <div>
+                              <div className="flex items-center justify-between gap-2 mb-3">
+                                <Badge variant="outline" className={`rounded-full ${check.status.toLowerCase().includes("true") ? "border-emerald-200 text-emerald-700" : "border-red-200 text-red-700"}`}>
+                                  {check.status}
+                                </Badge>
+                                <span className="text-xs text-slate-400 font-medium">{check.source}</span>
+                              </div>
+                              <p className="font-semibold text-slate-900 mt-1">"{check.claim}"</p>
+                            </div>
+                            {check.url && (
+                              <Button variant="link" className="mt-4 p-0 h-auto self-start text-blue-600" onClick={() => window.open(check.url, '_blank')}>
+                                Read Full Review <ExternalLink className="ml-1 h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            ) : (
+              <div className="text-center p-12">
+                <p className="text-slate-500">No results to display. Please verify a link from the home page.</p>
+                <Button onClick={() => setPage("Home")} className="mt-4 rounded-xl">Back Home</Button>
+              </div>
+            )}
           </div>
         )}
 
