@@ -136,84 +136,101 @@ function StatCard({ icon: Icon, title, value, sub }) {
 
 function Hero({ url, setUrl, onVerify, language, setLanguage }) {
   return (
-    <section className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-blue-50 px-6 py-10 shadow-sm sm:px-10 sm:py-14">
-      <div className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-blue-100 blur-3xl" />
-      <div className="absolute -bottom-16 -left-16 h-44 w-44 rounded-full bg-emerald-100 blur-3xl" />
+    <section className="relative overflow-hidden rounded-[3rem] border border-slate-200 bg-white px-6 py-14 shadow-2xl shadow-blue-500/5 sm:px-10 sm:py-20">
+      {/* Background Decor */}
+      <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-blue-50/50 blur-3xl" />
+      <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-emerald-50/50 blur-3xl" />
+      <div className="absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-slate-50/30 blur-3xl" />
 
-      <div className="relative mx-auto max-w-4xl text-center">
-        <Badge className="rounded-full bg-blue-100 px-4 py-1 text-blue-700 hover:bg-blue-100">
-          Neutral • Informative • Privacy-first
-        </Badge>
-        <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl">
-          Verify Before You Trust
-        </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
-          Check the authenticity of news, images, videos, and social media posts in seconds.
-        </p>
+      <div className="relative mx-auto max-w-5xl text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Badge className="rounded-full bg-blue-50 px-5 py-1.5 text-xs font-semibold uppercase tracking-wider text-blue-600 border border-blue-100 hover:bg-blue-50">
+            Truth • Transparency • Trust
+          </Badge>
+          <h1 className="mt-8 text-5xl font-black tracking-tight text-slate-900 sm:text-7xl lg:leading-[1.1]">
+            Combat Fake News <br />
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">With Artificial Intelligence</span>
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 sm:text-xl">
+            Empowering you to stay informed. Instantly verify news articles, social posts, and media using state-of-the-art claim verification technology.
+          </p>
+        </motion.div>
 
-        <div className="mx-auto mt-8 max-w-3xl rounded-3xl border border-slate-200 bg-white p-4 shadow-lg shadow-slate-200/50">
-          <div className="flex flex-col gap-3 md:flex-row">
-            <div className="relative flex-1">
-              <LinkIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="mx-auto mt-12 max-w-3xl rounded-[2.5rem] border border-slate-100 bg-white/80 p-5 shadow-2xl shadow-slate-200/40 backdrop-blur-xl"
+        >
+          <div className="flex flex-col gap-4 md:flex-row">
+            <div className="relative flex-1 group">
+              <LinkIcon className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-500" />
               <Input
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                placeholder="Paste a link to a news article, image, or post…"
-                className="h-14 rounded-2xl border-slate-200 pl-12 text-base"
+                placeholder="Paste an article URL or raw text here…"
+                className="h-16 rounded-[1.5rem] border-slate-200 bg-slate-50/50 pl-14 text-lg transition-all focus:bg-white focus:ring-4 focus:ring-blue-500/10"
               />
             </div>
             <div className="flex gap-3">
               <Button
-                variant="outline"
-                className="h-14 rounded-2xl border-slate-200 px-5"
-              >
-                <Upload className="mr-2 h-4 w-4" /> Upload Image
-              </Button>
-              <Button
                 onClick={onVerify}
-                className="h-14 rounded-2xl bg-blue-600 px-6 text-white hover:bg-blue-700"
+                disabled={!url}
+                className="h-16 rounded-[1.5rem] bg-slate-900 px-8 text-lg font-bold text-white shadow-lg transition-all hover:bg-black hover:scale-[1.02] active:scale-[0.98]"
               >
-                <Search className="mr-2 h-4 w-4" /> Verify Now
+                <Search className="mr-3 h-5 w-5" /> Analyze
               </Button>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-500">
-            <div className="flex items-center gap-2">
-              <Languages className="h-4 w-4" />
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-700 outline-none"
-              >
-                <option>English</option>
-                <option>Russian</option>
-                <option>Persian/Dari</option>
-                <option>Arabic</option>
-                <option>Turkish</option>
-              </select>
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-4 px-2 text-sm font-medium text-slate-500">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 rounded-full border border-slate-100 bg-white px-3 py-1.5 shadow-sm">
+                <Languages className="h-4 w-4 text-blue-500" />
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="bg-transparent outline-none cursor-pointer"
+                >
+                  <option>English</option>
+                  <option>Russian</option>
+                  <option>Turkish</option>
+                </select>
+              </div>
+              <span className="flex items-center gap-1.5">
+                <Lock className="h-4 w-4 text-emerald-500" /> 
+                End-to-end Privacy
+              </span>
             </div>
-            <div className="flex items-center gap-2">
-              <Lock className="h-4 w-4" /> We do NOT store your search queries
+            <div className="flex items-center gap-4">
+              <span className="text-blue-600 hover:underline cursor-pointer">How it works →</span>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
+        <div className="mt-16 grid gap-6 md:grid-cols-3">
           {[
-            { icon: LinkIcon, title: "Paste", text: "Add a link, screenshot, or post URL." },
-            { icon: Search, title: "Analyze", text: "Our system compares it against credible sources." },
-            { icon: ShieldCheck, title: "Results", text: "See match confidence, source labels, and warnings." },
+            { icon: AlertTriangle, title: "Deep Analysis", text: "We scan core claims using NLP and compare them across thousands of credible sources.", color: "text-amber-500" },
+            { icon: ShieldCheck, title: "Source Integrity", text: "Get transparency on the reputation, bias, and history of the publishing domain.", color: "text-blue-500" },
+            { icon: CheckCircle2, title: "Verified Facts", text: "Direct integration with global fact-checking networks like Google and Reuters.", color: "text-emerald-500" },
           ].map((item, i) => (
-            <Card key={i} className="rounded-2xl border-slate-200 text-left shadow-sm">
-              <CardContent className="p-5">
-                <div className="mb-4 inline-flex rounded-2xl bg-slate-100 p-3">
-                  <item.icon className="h-5 w-5 text-slate-700" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-900">{item.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{item.text}</p>
-              </CardContent>
-            </Card>
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 + i * 0.1 }}
+              className="group flex flex-col items-center p-4"
+            >
+              <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-xl shadow-slate-200/50 transition-transform group-hover:scale-110`}>
+                <item.icon className={`h-7 w-7 ${item.color}`} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900">{item.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-slate-500 line-clamp-2">{item.text}</p>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -714,32 +731,11 @@ export default function FakeNewsDetectorFrontend() {
             />
 
             <div className="grid gap-4 md:grid-cols-4">
-              <StatCard icon={ShieldCheck} title="Trust-centered UI" value="100%" sub="Designed for clear verification flow" />
-              <StatCard icon={Languages} title="Languages" value="5" sub="Focused MVP support" />
-              <StatCard icon={Globe} title="Multi-source" value="3–5" sub="Perspectives per claim" />
-              <StatCard icon={Lock} title="Privacy" value="Local" sub="History stored on device" />
+              <StatCard icon={ShieldCheck} title="Verified Results" value="100%" sub="Evidence-based claim analysis" />
+              <StatCard icon={Languages} title="Coverage" value="Multi-lingual" sub="Local and global insights" />
+              <StatCard icon={Globe} title="Intelligence" value="AI Driven" sub="Gemini powered synthesis" />
+              <StatCard icon={Lock} title="Security" value="Privacy-First" sub="No data storage, fully private" />
             </div>
-
-            <Card className="rounded-3xl border-slate-200 shadow-sm">
-              <CardHeader>
-                <CardTitle>Preview result states</CardTitle>
-                <CardDescription>Use the tabs below to review both UX outcomes</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="verified" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-slate-100">
-                    <TabsTrigger value="verified" className="rounded-2xl">Verified result</TabsTrigger>
-                    <TabsTrigger value="unverified" className="rounded-2xl">Unverified result</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="verified" className="mt-6">
-                    <VerifiedResult query={url} />
-                  </TabsContent>
-                  <TabsContent value="unverified" className="mt-6">
-                    <UnverifiedResult query={url || "https://viral-post.example/fake-claim"} />
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
           </div>
         )}
 
