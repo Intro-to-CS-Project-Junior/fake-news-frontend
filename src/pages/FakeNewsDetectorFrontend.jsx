@@ -33,7 +33,7 @@ import { Textarea } from "../components/ui/textarea";
 import { Checkbox } from "../components/ui/checkbox";
 import { Label } from "../components/ui/label";
 
-const navItems = ["Home", "Results", "History", "About", "Contact"];
+const navItems = ["Home", "Results", "About", "Contact"];
 
 const demoHistory = [
   {
@@ -466,80 +466,6 @@ function UnverifiedResult({ query }) {
   );
 }
 
-function HistoryDashboard() {
-  const [filter, setFilter] = useState("all");
-  const [search, setSearch] = useState("");
-
-  const filtered = useMemo(() => {
-    return demoHistory.filter((item) => {
-      const statusOk = filter === "all" ? true : item.status === filter;
-      const searchOk = item.query.toLowerCase().includes(search.toLowerCase());
-      return statusOk && searchOk;
-    });
-  }, [filter, search]);
-
-  return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
-        <StatCard icon={History} title="Total checks" value="128" sub="Stored locally on this device" />
-        <StatCard icon={CheckCircle2} title="Verified" value="76" sub="Reliable source found" />
-        <StatCard icon={AlertTriangle} title="Unverified" value="52" sub="Needs caution or more review" />
-      </div>
-
-      <Card className="rounded-3xl border-slate-200 shadow-sm">
-        <CardHeader>
-          <CardTitle>History Dashboard</CardTitle>
-          <CardDescription>Your search history is stored locally and not shared.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="relative w-full md:max-w-md">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search past checks..."
-                className="rounded-2xl border-slate-200 pl-10"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-slate-500" />
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-700 outline-none"
-              >
-                <option value="all">All</option>
-                <option value="verified">Verified</option>
-                <option value="unverified">Unverified</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="overflow-hidden rounded-2xl border border-slate-200">
-            <div className="hidden grid-cols-[1.4fr_0.5fr_0.7fr] gap-4 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-600 md:grid">
-              <div>Query</div>
-              <div>Status</div>
-              <div>Timestamp</div>
-            </div>
-            {filtered.map((item) => (
-              <div
-                key={item.id}
-                className="grid gap-3 border-t border-slate-200 px-4 py-4 md:grid-cols-[1.4fr_0.5fr_0.7fr] md:items-center"
-              >
-                <div className="break-all text-sm text-slate-800">{item.query}</div>
-                <div>
-                  <StatusPill status={item.status} />
-                </div>
-                <div className="text-sm text-slate-500">{item.time}</div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
 
 function AboutPage() {
   return (
@@ -814,7 +740,6 @@ export default function FakeNewsDetectorFrontend() {
           </div>
         )}
 
-        {page === "History" && <HistoryDashboard />}
         {page === "About" && <AboutPage />}
         {page === "Contact" && <ContactPage />}
       </main>
